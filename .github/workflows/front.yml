@@ -13,7 +13,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
       with:
-        repository: 'https://github.com/frontend-park-mail-ru/2020_2_softree'
+        repository: 'frontend-park-mail-ru/2020_2_softree'
 
     - run: ls
 
