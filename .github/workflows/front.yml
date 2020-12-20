@@ -11,20 +11,27 @@ jobs:
         node-version: [15.x]
 
     steps:
-    - uses: actions/checkout@v2
+    - name: Get front
+      uses: actions/checkout@v2
       with:
         repository: 'frontend-park-mail-ru/2020_2_softree'
-
-    - run: ls
 
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
 
-    - run: npm ci
-    - run: npm run build
-    - run: ls
+    - name: Get dependecies
+      run: npm ci
+
+    - name: Build
+      run: npm run build
+
+    - name: Upload build result
+      uses: actions/upload-artifact@v1
+      with:
+        name: dist
+        path: ./dist
 
   deploy:
     runs-on: ubuntu-latest
