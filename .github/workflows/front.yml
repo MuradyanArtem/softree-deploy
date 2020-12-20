@@ -12,10 +12,16 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
+      with:
+        repository: 'https://github.com/frontend-park-mail-ru/2020_2_softree'
+
+    - run: ls
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+
     - run: npm ci
     - run: npm run build
 
