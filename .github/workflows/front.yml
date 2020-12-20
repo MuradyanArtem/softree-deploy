@@ -1,6 +1,10 @@
 name: Front
 
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Target branch'
 
 jobs:
   build:
@@ -15,6 +19,7 @@ jobs:
       uses: actions/checkout@v2
       with:
         repository: 'frontend-park-mail-ru/2020_2_softree'
+        ref: ${{ github.event.inputs.tags }}
 
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
