@@ -72,5 +72,12 @@ jobs:
           playbook: deploy.yml
           directory: ./ansible
           key: ${{secrets.SSH_PRIVATE_KEY}}
-          inventory: inventory.yml
+          inventory: |
+            ---
+            all:
+              hosts:
+                prod-servers:
+                  ansible_host: '178.154.227.8'
+                  ansible_user: 'root'
+                  ansible_python_interpreter: '/usr/bin/python3'
           vault_password: ${{secrets.VAULT_PASSWORD}}
