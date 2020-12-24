@@ -4,7 +4,7 @@ on: workflow_dispatch
 
 jobs:
   build_front:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     strategy:
       matrix:
         node-version: [15.x]
@@ -33,7 +33,7 @@ jobs:
           path: ./dist
 
   deploy_front:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     needs: build_front
     steps:
     -
@@ -58,7 +58,7 @@ jobs:
         SOURCE_DIR: 'dist'
 
   deploy_back:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-20.04
     steps:
       -
         name: Checkout dir
