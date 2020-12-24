@@ -1,0 +1,98 @@
+---
+- hosts: all
+
+  vars:
+    nginx_conf: "/etc/nginx/sites-enabled"
+    docker_compose_version: ""
+    docker_compose_path: /usr/local/bin/docker-compose
+    backend_directory: '/opt/backend'
+
+  tasks:
+    - name: install latest version of nginx
+      apt:
+        name: nginx
+        state: latest
+        update_cache: yes
+        force_apt_get: yes
+
+    - name: ensure docker is latest version
+      apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: latest
+        force_apt_get: yes
+
+    - name: get latest docker compose release data
+      uri:
+        url: https://api.github.com/repos/docker/compose/releases/latest
+        return_content: yes
+      register: docker_compose_releases
+      when: not docker_compose_version
+
+    - set_fact:
+        docker_compose_version: "{{ docker_compose_releases.json.tag_name }}"
+      when: not docker_compose_version
+
+    - name: check current docker-compose version on remote
+      command: "{{ docker_compose_path }} --version"
+      register: docker_compose_current_version
+      changed_when: false
+      failed_when: false
+
+    - name: check if docker-compose version is different from required
+      set_fact:
+        docker_compose_needs_install: "{{ docker_compose_version not in (docker_compose_current_version.stdout | default('') ) }}"
+
+    - name: delete existing docker-compose if version is different
+      file:
+        path: "{{ docker_compose_path }}"
+        state: absent
+      when: docker_compose_needs_install
+
+    - name: install Docker Compose
+      get_url:
+        url: https://github.com/docker/compose/releases/download/{{ docker_compose_version }}/docker-compose-Linux-x86_64
+        dest: "{{ docker_compose_path }}"
+        mode: 0755
+      when: docker_compose_needs_install
+
+    - name: copy site config
+      copy:
+        src: ./files/moneycat.conf
+        dest: "{{ nginx_conf }}"
+        mode: 0644
+
+    - name: reload nginx
+      systemd:
+        name: nginx
+        state: reloaded
+
+    - name: copy backend config
+      copy:
+        src: ./files/configs
+        dest: "{{ backend_directory }}"
+        mode: 0644
+
+    - name: copy compose file
+      copy:
+        src: ./files/docker-compose.yml
+        dest: "{{ backend_directory }}"
+        mode: 0644
+
+    - name: docker-compose pull
+      command: "{{ docker_compose_path }} pull"
+      args:
+        chdir: "{{ backend_directory }}"
+      notify:
+        - prune system
+
+    - name: docker-compose up
+      command: "{{ docker_compose_path }} up -d"
+      args:
+        chdir: "{{ backend_directory }}"
+
+  handlers:
+    - name: prune system
+      command: "docker system prune -f"
