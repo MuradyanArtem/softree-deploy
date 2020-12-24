@@ -64,8 +64,7 @@ jobs:
       - name: deploy backend
         uses: dawidd6/action-ansible-playbook@v2
         with:
-          playbook: deploy.yml
-          directory: ansible
+          playbook: ansible/deploy.yml
           key: ${{secrets.SSH_PRIVATE_KEY}}
-          inventory: inventory.yml
+          inventory: ansible/inventory.yml
           vault_password: ${{secrets.VAULT_PASSWORD}}
